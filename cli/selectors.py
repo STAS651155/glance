@@ -79,7 +79,6 @@ def _build_java_table(java_installations: list) -> Table:
 
 
 def _prompt_java_selection(java_installations: list):
-    """Prompt user to select a Java installation."""
     while True:
         try:
             choice = Prompt.ask("[cyan]Select Java[/]", default="1")
@@ -174,3 +173,53 @@ def _handle_version_input(versions: list, current_page: int, total_pages: int):
         return None
     except KeyboardInterrupt:
         return None
+
+
+def select_mode():
+    """Let user choose between Auto mode (launch Minecraft) or Manual mode (proxy only)."""
+    console.print()
+    console.rule("[bold cyan]Select Mode[/]", style="cyan")
+    console.print()
+
+    table = Table(
+        title="[bold cyan]Available Modes[/]",
+        box=box.ROUNDED,
+        header_style="bold magenta",
+        show_lines=True,
+    )
+    table.add_column("#", style="cyan", justify="center", width=4)
+    table.add_column("Mode", style="white", width=15)
+    table.add_column("Description", style="dim")
+
+    table.add_row(
+        "1",
+        "[bold green]Auto[/]",
+        "Launch Minecraft automatically with proxy configured",
+    )
+    table.add_row(
+        "2",
+        "[bold yellow]Manual[/]",
+        "Start proxy only on port 8080 - launch Minecraft yourself",
+    )
+
+    console.print(table)
+    console.print()
+
+    while True:
+        try:
+            choice = Prompt.ask("[cyan]Select mode[/]", default="1")
+            choice = int(choice)
+            if choice == 1:
+                console.print(
+                    "[bold green]✓[/] Mode: [cyan]Auto[/] (with Minecraft launch)"
+                )
+                return "auto"
+            elif choice == 2:
+                console.print("[bold green]✓[/] Mode: [cyan]Manual[/] (proxy only)")
+                return "manual"
+            else:
+                console.print("[red]Invalid choice. Enter 1 or 2[/]")
+        except ValueError:
+            console.print("[red]Enter a number[/]")
+        except KeyboardInterrupt:
+            return None

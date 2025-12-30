@@ -9,8 +9,13 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from cli.display import print_banner
-from cli.selectors import select_java, select_minecraft_version
-from cli.session import setup_certificates, get_username, launch_session
+from cli.selectors import select_java, select_minecraft_version, select_mode
+from cli.session import (
+    setup_certificates,
+    get_username,
+    launch_session,
+    launch_manual_mode,
+)
 from utils.minecraft import find_minecraft_directory
 
 console = Console()
@@ -32,13 +37,24 @@ def main():
     print_banner()
     console.print()
 
-    # Select Java
     java_home = select_java()
     if not java_home:
         console.print("\n[bold red]✗[/] Java not selected. Exiting.")
         sys.exit(1)
 
-    # Find Minecraft
+    success, cert_path = setup_certificates(java_home)
+    if not success:
+        sys.exit(1)
+
+    mode = select_mode()
+    if not mode:
+        console.print("\n[bold red]✗[/] Mode not selected. Exiting.")
+        sys.exit(1)
+
+    if mode == "manual":
+        launch_manual_mode()
+        return
+
     minecraft_dir = _find_minecraft()
     if not minecraft_dir:
         console.print("[bold red]✗[/] .minecraft folder not found!")
@@ -46,13 +62,6 @@ def main():
         sys.exit(1)
 
     console.print(f"[bold green]✓[/] Found Minecraft: [dim]{minecraft_dir}[/]")
-
-    # Certificate setup
-    success, cert_path = setup_certificates(java_home)
-    if not success:
-        sys.exit(1)
-
-    # Select Minecraft version
     console.print()
     console.rule("[bold cyan]Select Minecraft Version[/]", style="cyan")
 
@@ -61,7 +70,6 @@ def main():
         console.print("\n[bold red]✗[/] Version not selected. Exiting.")
         sys.exit(1)
 
-    # Get username and launch
     username = get_username()
     launch_session(java_home, minecraft_dir, version, username)
 

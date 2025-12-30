@@ -48,17 +48,22 @@ def check_heuristics(
     parsed = urlparse(url)
     host = parsed.netloc or parsed.hostname or "unknown"
 
-    # Check 1: Direct IP address connection
+    if host in unknown_hosts:
+        if method in ["POST", "PUT"] and body:
+            score += 2
+            reasons.append(f"Unknown host receiving data: {host} ({method})")
+        elif method in ["POST", "PUT"]:
+            score += 1
+            reasons.append(f"Unknown host with {method} request: {host}")
+
     if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", host):
         score += 2
         reasons.append(f"Direct IP connection: {host}")
 
-    # Check 2: Suspicious port usage
     if parsed.port and parsed.port in SUSPICIOUS_PORT_RANGES:
         score += 1
         reasons.append(f"Suspicious port: {parsed.port}")
 
-    # Check 3: Large POST body (data exfiltration)
     if method in ["POST", "PUT"] and body:
         body_size = len(body.encode("utf-8"))
         if body_size > MAX_POST_BODY_SIZE:
@@ -67,19 +72,10 @@ def check_heuristics(
                 f"Large data upload: {body_size} bytes (threshold: {MAX_POST_BODY_SIZE})"
             )
 
-    # Check 4: Suspicious URL paths
     score, reasons = _check_url_indicators(url, score, reasons)
-
-    # Check 5: Suspicious headers
     score, reasons = _check_suspicious_headers(headers, score, reasons)
-
-    # Check 6: Base64 encoded data in body (obfuscation)
     score, reasons = _check_base64_obfuscation(body, score, reasons)
-
-    # Check 7: Unknown host with suspicious user agent
     score, reasons = _check_user_agent(headers, host, unknown_hosts, score, reasons)
-
-    # Check 8: JSON/form data with credential-like fields
     score, reasons = _check_credential_fields(body, method, score, reasons)
 
     return score, reasons

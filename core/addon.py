@@ -6,19 +6,17 @@ Intercepts and analyzes HTTPS traffic for suspicious activity.
 import sys
 from pathlib import Path
 
-# Add parent directory to path so imports work when loaded by mitmproxy
 addon_dir = Path(__file__).parent
 project_root = addon_dir.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-# ruff: noqa: E402
-from datetime import datetime
-from collections import defaultdict
-from urllib.parse import urlparse
+from datetime import datetime  # noqa: E402
+from collections import defaultdict  # noqa: E402
+from urllib.parse import urlparse  # noqa: E402
 
-from mitmproxy import http, ctx
-from core.config import (
+from mitmproxy import http, ctx  # noqa: E402
+from core.config import (  # noqa: E402
     STRICT_MODE,
     IGNORE_HOSTS,
     LOG_ALL_CONNECTIONS,
@@ -26,12 +24,12 @@ from core.config import (
     MAX_POST_BODY_SIZE,
     MAX_REQUEST_FREQUENCY,
 )
-from core.detection import (
+from core.detection import (  # noqa: E402
     is_suspicious_request,
     check_heuristics,
     extract_tokens,
 )
-from core.reporting import (
+from core.reporting import (  # noqa: E402
     log_connection,
     log_bypassed_connection,
     log_suspicious_activity,
@@ -57,7 +55,6 @@ class GlanceAddon:
             else "unknown"
         )
 
-        # Log connection even if SNI is missing (IP-based connection)
         if not client_hello:
             ctx.log.warn(f"[!] IP-BASED CONNECTION (no SNI) from {client_address}")
             if LOG_ALL_CONNECTIONS:
@@ -69,7 +66,6 @@ class GlanceAddon:
                 )
             return
 
-        # Log all connections for behavioral analysis
         if LOG_ALL_CONNECTIONS:
             log_connection(
                 self.connection_log, client_hello, is_encrypted=True, has_sni=True
@@ -93,7 +89,6 @@ class GlanceAddon:
                     data.ignore_connection = True
                     return
 
-            # Track unknown hosts
             if BEHAVIORAL_ANALYSIS:
                 self.unknown_hosts.add(client_hello)
                 ctx.log.warn(f"[?] UNKNOWN HOST: {client_hello}")
@@ -106,26 +101,20 @@ class GlanceAddon:
         headers = dict(request.headers)
         body = request.text or ""
 
-        # Log all connections in detail (except IGNORE hosts)
         if LOG_ALL_CONNECTIONS:
             self._log_detailed_connection(method, url, headers, body)
 
-        # Track request frequency for behavioral analysis
         if BEHAVIORAL_ANALYSIS:
             self._track_request(url, method, body)
 
-        # Check for suspicious patterns (known malware)
         is_known_suspicious = is_suspicious_request(url, body)
-
-        # Check for heuristic indicators (unknown C2 behavior)
         heuristic_score, heuristic_reasons = check_heuristics(
             url, method, headers, body, self.unknown_hosts
         )
 
-        # Check for behavioral anomalies
         behavioral_flags = self._check_behavioral_anomalies(url)
 
-        if is_known_suspicious or (heuristic_score >= 3):
+        if is_known_suspicious or (heuristic_score >= 2):
             reason = (
                 "KNOWN MALWARE"
                 if is_known_suspicious
@@ -137,7 +126,6 @@ class GlanceAddon:
                     ctx.log.warn(f"      - {r}")
             self._handle_suspicious(flow, method, url, headers, body, heuristic_reasons)
         elif heuristic_score > 0 or behavioral_flags:
-            # Log potentially suspicious activity
             ctx.log.warn(
                 f"[?] POTENTIALLY SUSPICIOUS: {method} {url} (score={heuristic_score})"
             )
@@ -161,7 +149,6 @@ class GlanceAddon:
         current_time = datetime.now()
         self.request_frequency[host].append(current_time)
 
-        # Track data volume
         if method in ["POST", "PUT"]:
             self.data_volumes[host] += len(body.encode("utf-8")) if body else 0
 
@@ -174,7 +161,6 @@ class GlanceAddon:
         if not BEHAVIORAL_ANALYSIS:
             return flags
 
-        # Check request frequency
         current_time = datetime.now()
         recent_requests = [
             t
@@ -187,7 +173,6 @@ class GlanceAddon:
                 f"High request frequency to {host}: {len(recent_requests)}/min"
             )
 
-        # Check data volume
         if self.data_volumes[host] > MAX_POST_BODY_SIZE * 5:
             flags.append(
                 f"Large data volume to {host}: {self.data_volumes[host]} bytes"
@@ -208,13 +193,11 @@ class GlanceAddon:
         full_text = f"{url}\n{body}"
         found_tokens = extract_tokens(full_text)
 
-        # Save reports
         txt_name, json_name = save_blocked_report(
             method, url, headers, body, found_tokens, heuristic_reasons
         )
         ctx.log.info(f"[i] Report saved: {txt_name} + {json_name}")
 
-        # Block the request with a fake success response
         flow.response = http.Response.make(
             200,
             b'{"success": true, "message": "Request processed successfully"}',
@@ -223,5 +206,4 @@ class GlanceAddon:
         ctx.log.error("[✓] MALICIOUS REQUEST BLOCKED - Your data is safe!")
 
 
-# Addon instance for mitmproxy
 addons = [GlanceAddon()]

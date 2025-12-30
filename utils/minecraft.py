@@ -7,10 +7,34 @@ import glob
 import subprocess
 import uuid
 import hashlib
+import re
 
 import minecraft_launcher_lib
 
 from utils.platform_utils import get_platform, get_java_executable
+
+
+def is_fabric_version(version: str) -> tuple[bool, str | None]:
+    """Check if version is Fabric and extract vanilla version.
+
+    Returns:
+        (is_fabric, vanilla_version)
+    """
+    if "fabric" not in version.lower():
+        return False, None
+
+    patterns = [
+        r"fabric-loader-[\d.]+-([\d.]+)",  # fabric-loader-0.16.14-1.21
+        r"([\d.]+)-fabric",  # 1.21-fabric
+        r"fabric-([\d.]+)",  # fabric-1.21
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, version)
+        if match:
+            return True, match.group(1)
+
+    return True, None
 
 
 def find_minecraft_directory():
@@ -81,9 +105,47 @@ def launch_minecraft(java_home, minecraft_dir, version, username="Player"):
     java_exe = get_java_executable(java_home)
 
     try:
-        # Generate offline UUID from username (consistent with Minecraft offline mode)
+        is_fabric, vanilla_version = is_fabric_version(version)
+        if is_fabric:
+            print(f"\n[>] Launching Fabric version: {version}")
+
+            version_json_path = os.path.join(
+                minecraft_dir, "versions", version, f"{version}.json"
+            )
+            if os.path.exists(version_json_path):
+                import json
+
+                with open(version_json_path, "r", encoding="utf-8") as f:
+                    fabric_data = json.load(f)
+
+                vanilla_jar_version = fabric_data.get("jar")
+                if vanilla_jar_version:
+                    vanilla_jar_path = os.path.join(
+                        minecraft_dir,
+                        "versions",
+                        vanilla_jar_version,
+                        f"{vanilla_jar_version}.jar",
+                    )
+
+                    if not os.path.exists(vanilla_jar_path):
+                        print(f"    [!] Missing vanilla jar: {vanilla_jar_version}")
+                        print(
+                            f"    [>] Installing vanilla Minecraft {vanilla_jar_version}..."
+                        )
+
+                        try:
+                            minecraft_launcher_lib.install.install_minecraft_version(
+                                vanilla_jar_version, minecraft_dir
+                            )
+                            print(f"    [✓] Vanilla {vanilla_jar_version} installed")
+                        except Exception as e:
+                            print(f"    [!] Failed to install vanilla version: {e}")
+                            print(
+                                f"    [!] Please install vanilla {vanilla_jar_version} manually first!"
+                            )
+                            return None
+
         player_uuid = str(uuid.uuid3(uuid.NAMESPACE_DNS, f"OfflinePlayer:{username}"))
-        # Generate access token using MD5 hash (mimics offline authentication)
         access_token = hashlib.md5(f"{username}{player_uuid}".encode()).hexdigest()
 
         jvm_args = [
@@ -117,7 +179,6 @@ def launch_minecraft(java_home, minecraft_dir, version, username="Player"):
         print("    Proxy: 127.0.0.1:8080")
         print()
 
-        # Suppress Minecraft output to keep console clean for MITM logs
         return subprocess.Popen(
             command,
             cwd=minecraft_dir,

@@ -18,7 +18,11 @@ from utils.certificates import (
     install_cert_to_java,
     generate_mitmproxy_cert,
 )
-from cli.display import show_active_session_panel, show_manual_launch_panel
+from cli.display import (
+    show_active_session_panel,
+    show_manual_launch_panel,
+    show_manual_mode_panel,
+)
 
 console = Console()
 
@@ -39,7 +43,6 @@ def setup_certificates(java_home: str) -> tuple[bool, str | None]:
     console.rule("[bold cyan]Certificate Setup[/]", style="cyan")
     console.print()
 
-    # Generate certificate
     with show_spinner("Checking mitmproxy certificate...") as progress:
         progress.add_task("Checking mitmproxy certificate...", total=None)
         success = generate_mitmproxy_cert()
@@ -51,7 +54,6 @@ def setup_certificates(java_home: str) -> tuple[bool, str | None]:
     cert_path = get_mitmproxy_cert_path()
     console.print(f"[bold green]✓[/] Certificate: [dim]{cert_path}[/]")
 
-    # Install to Java
     with show_spinner("Installing certificate to Java keystore...") as progress:
         progress.add_task("Installing certificate to Java keystore...", total=None)
         installed = install_cert_to_java(java_home, cert_path)
@@ -139,3 +141,27 @@ def _handle_session(mitm_process: subprocess.Popen, mc_process):
         except KeyboardInterrupt:
             mitm_process.terminate()
             console.print("\n[bold green]✓[/] Proxy stopped")
+
+
+def launch_manual_mode():
+    """Launch only the MITM proxy for manual Minecraft launch."""
+    console.print()
+    console.rule("[bold cyan]Manual Mode[/]", style="cyan")
+    console.print()
+
+    console.print("[bold green]▶[/] Starting MITM proxy on port [cyan]8080[/]...")
+    console.print(f"[dim]  Exports folder: {EXPORT_FOLDER.absolute()}[/]")
+    console.print()
+
+    mitm_process = _start_mitm_proxy()
+    if not mitm_process:
+        return
+
+    time.sleep(1)
+    show_manual_mode_panel()
+
+    try:
+        mitm_process.wait()
+    except KeyboardInterrupt:
+        mitm_process.terminate()
+        console.print("\n[bold green]✓[/] Proxy stopped")

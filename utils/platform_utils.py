@@ -27,7 +27,6 @@ def find_java_installations():
     java_paths = []
     current_os = get_platform()
 
-    # Try to find Java via PATH
     try:
         if current_os == "windows":
             result = subprocess.run(
@@ -48,7 +47,6 @@ def find_java_installations():
     except Exception:
         pass
 
-    # Search standard installation paths
     standard_paths = _get_standard_java_paths(current_os)
 
     for base_path in standard_paths:
@@ -60,7 +58,6 @@ def find_java_installations():
                         if is_valid_java_home(full_path):
                             if full_path not in java_paths:
                                 java_paths.append(full_path)
-                        # Check for macOS Contents/Home structure
                         contents_home = os.path.join(full_path, "Contents", "Home")
                         if os.path.exists(contents_home) and is_valid_java_home(
                             contents_home
@@ -70,7 +67,6 @@ def find_java_installations():
             except PermissionError:
                 pass
 
-    # Check JAVA_HOME environment variable
     java_home_env = os.environ.get("JAVA_HOME")
     if (
         java_home_env

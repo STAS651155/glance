@@ -80,3 +80,22 @@ def show_manual_launch_panel():
             border_style="yellow",
         )
     )
+
+
+def show_manual_mode_panel():
+    """Display the manual mode panel with proxy instructions."""
+    console.print()
+    console.print(
+        Panel(
+            "[bold cyan]MITM Proxy is running on port 8080[/]\n\n"
+            "[white]Configure Minecraft to use the proxy:[/]\n"
+            "[cyan]  • Host: 127.0.0.1[/]\n"
+            "[cyan]  • Port: 8080[/]\n\n"
+            "[dim]Launch Minecraft with JVM arguments:[/]\n"
+            "[dim]  -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8080[/]\n\n"
+            "[yellow]Press Ctrl+C to stop the proxy[/]",
+            title="[bold]🔧 Manual Mode Active[/]",
+            border_style="cyan",
+            box=box.DOUBLE,
+        )
+    )

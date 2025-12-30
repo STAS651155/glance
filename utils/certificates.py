@@ -21,19 +21,15 @@ def get_java_major_version(java_home):
         )
         version_output = result.stderr if result.stderr else result.stdout
 
-        # Parse version string (e.g., "1.8.0_292" or "17.0.1" or "22.0.2")
         for line in version_output.split("\n"):
             if "version" in line.lower():
-                # Extract version number from quotes
                 import re
 
                 match = re.search(r'"([^"]+)"', line)
                 if match:
                     version_str = match.group(1)
-                    # Handle "1.8.0" format (Java 8 and earlier)
                     if version_str.startswith("1."):
                         return int(version_str.split(".")[1])
-                    # Handle "9.0.1", "17.0.1", "22.0.2" format (Java 9+)
                     else:
                         return int(version_str.split(".")[0])
         return None
@@ -79,7 +75,6 @@ def find_cacerts(java_home):
 
 def check_cert_installed(keytool, cacerts_path, alias="mitmproxy", java_home=None):
     """Check if a certificate is already installed in the keystore."""
-    # Determine if we should use -cacerts or -keystore based on Java version
     use_cacerts = java_home and supports_cacerts_option(java_home)
 
     if use_cacerts:
@@ -126,7 +121,6 @@ def install_cert_to_java(java_home, cert_path):
         print(f"  [OK] Certificate already installed in {java_home}")
         return True
 
-    # Determine if we should use -cacerts or -keystore based on Java version
     use_cacerts = supports_cacerts_option(java_home)
 
     if use_cacerts:

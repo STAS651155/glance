@@ -47,7 +47,6 @@ def log_detailed_request(method: str, url: str, headers: dict, body: str):
         f.write(json.dumps(headers, indent=2, ensure_ascii=False))
         f.write("\n\n--- Body ---\n")
         if body:
-            # Truncate very large bodies to prevent log bloat
             if len(body) > 10000:
                 f.write(f"{body[:10000]}\n... [TRUNCATED - {len(body)} total bytes]\n")
             else:
@@ -119,13 +118,11 @@ def save_blocked_report(
     content_hash = hashlib.md5((url + body).encode()).hexdigest()[:8]
     base_name = f"{timestamp}_{content_hash}"
 
-    # Save human-readable report
     txt_file = EXPORT_FOLDER / f"{base_name}_BLOCKED.txt"
     _write_txt_report(
         txt_file, method, url, headers, body, found_tokens, heuristic_reasons
     )
 
-    # Save machine-readable JSON
     json_file = EXPORT_FOLDER / f"{base_name}_intercept.json"
     _write_json_report(json_file, method, url, headers, body, found_tokens)
 
