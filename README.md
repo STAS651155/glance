@@ -19,11 +19,19 @@ Glance intercepts HTTPS traffic from Minecraft, detects these requests, **blocks
 
 ## Installation
 
+### From Source
+
 1. Install [Python 3.8+](https://python.org)
 2. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
+
+### From Releases
+
+1. Download the appropriate build for your platform from [Releases](https://github.com/DedInc/glance/releases)
+2. ⚠️ **Important:** Download and install [mitmproxy](https://www.mitmproxy.org/downloads/) — it is required but not included in the release builds
+3. Run the executable directly
 
 ## Usage
 
